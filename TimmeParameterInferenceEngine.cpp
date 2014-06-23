@@ -61,22 +61,52 @@ TimmeParameterInferenceEngine::TimmeParameterInferenceEngine(int unitCount, int 
 
 	}
 
+TimmeParameterInferenceEngine::TimmeParameterInferenceEngine(int unitCount, int nTimesteps, int unitDimension, int parametersPerUnit, vector<vector <double> >& populationTimeseries, IDynamicalUnit** dummyUnits){
+
+	this->ID = 0;
+	this->unitCount = unitCount;
+//	this->nTimesteps = nTimesteps;
+	this->nTimesteps = (int)populationTimeseries.size();
+	this->unitDimension = unitDimension;
+	this->parametersPerUnit = parametersPerUnit;
+	this->timeseriesFileName = "not needed";
+
+	X = zeros<mat>(1,1);
+	G = zeros<mat>(1,1);
+
+	this->jHat = new double*[unitCount];
+	for (int i=0; i < this->unitCount; i++){jHat[i] = new double[unitCount+(parametersPerUnit*unitCount)];}
+
+	this->fullTimeseries = new double*[nTimesteps];
+	int columnCount = unitCount + 1;
+	for (int i = 0; i <= nTimesteps; i++) {
+		fullTimeseries[i] = new double[columnCount];
+		for (int j=0; j<columnCount; j++){
+			fullTimeseries[i][j] = populationTimeseries.at(i).at(j);
+		}
+	}
+
+
+	this->timestepSize = 0;
+	this->units = dummyUnits;
+
+}
 
 bool TimmeParameterInferenceEngine::runInference(int sampleStepLength){
 		// fill timeseries:
 //		readUnitHistoriesToArray();
 
 	// REPLACE THIS!! DATA BODGE..
-	double replaceZero = 100;
-	int columnCount = unitCount * unitDimension + 1;
-	for (int i = 0; i<nTimesteps; i++){
-		for (int j=0; j<columnCount; j++){
-			if (fullTimeseries[i][j]==0){
-				fullTimeseries[i][j] = replaceZero;
-			}
-		}
-	}
-
+//	double replaceZero = 100;
+//	int columnCount = unitCount * unitDimension + 1;
+//	for (int i = 0; i<nTimesteps; i++){
+//		for (int j=0; j<columnCount; j++){
+//			if (fullTimeseries[i][j]==0){
+//				fullTimeseries[i][j] = replaceZero;
+//			}
+//		}
+//	}
+//
 
 		if(!fillJhat(sampleStepLength)){
 			return false;

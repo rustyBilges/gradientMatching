@@ -93,6 +93,9 @@ public:
 	// should not be using c-strings!!
 	TimmeParameterInferenceEngine(int unitCount, int nTimesteps, int unitDimension, int parametersPerUnit, const char* timeseriesFileName, IDynamicalUnit** dummyUnits);
 
+	// this constructor takes a timeseires vector to run inference on. THIS SHOULD BE USED IN ALL CASES!
+	TimmeParameterInferenceEngine(int unitCount, int nTimesteps, int unitDimension, int parametersPerUnit, vector<vector <double> >& populationTimeseries, IDynamicalUnit** dummyUnits);
+
 	bool runInference(int sampleStepLength);
 
 	bool fillJhat(int sampleStepLength);
