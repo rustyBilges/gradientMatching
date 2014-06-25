@@ -39,6 +39,8 @@ public:
 //
 		virtual void printJhat() = 0;
 //
+		virtual bool getEstimatedIM(vector<vector<double> >& estIM) = 0;
+		virtual bool getEstimatedParams(vector<double>& estParams) = 0;
 //		virtual void printQ(double accuracy, INetwork *net) = 0;
 
 //		updated version:
@@ -59,13 +61,12 @@ class GradientMatchingEngine_wParameterEstimation : public IInferenceEngine
 private:
 	int simID;
 	int unitCount;
-	int timestepCount;
+	int timestepCount;      // is now redunadant. check now required for further methods.
 	int parametersPerUnit;  // assumed to be 1?
 
 	vector <vector <double> >* interpolatedTimeseries;
-//	double **fullTimeseries;
-
-	double **jHat;   // following Timme notation: jHat is the inferred adjacency matrix.
+	vector <vector <double> > jHat;  // following Timme notation: jHat is the inferred adjacency matrix.
+//	double **jHat;
 	mat X;
 	mat G;
 
@@ -78,10 +79,10 @@ public:
 //			delete[] fullTimeseries[i];
 //		}
 //		delete[] fullTimeseries;
-		for (int i=0; i < this->unitCount; i++){
-			delete[] jHat[i];
-		}
-		delete[] jHat;
+//		for (int i=0; i < this->unitCount; i++){
+//			delete[] jHat[i];
+//		}
+//		delete[] jHat;
 	}
 
 	// this constructor takes a timeseires vector to run inference on. THIS SHOULD BE USED IN ALL CASES!
@@ -90,8 +91,9 @@ public:
 	bool runInference(int sampleStepLength);
 
 	bool fillJhat(int sampleStepLength);
-
 	void printJhat();
+	bool getEstimatedIM(vector<vector<double> >& estIM);
+	bool getEstimatedParams(vector<double>& estParams);
 
 	// updated from:
 	//double qualityOfReconstruction(double accuracy, INetwork *net);

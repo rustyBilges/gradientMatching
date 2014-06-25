@@ -20,8 +20,10 @@ GradientMatchingEngine_wParameterEstimation::GradientMatchingEngine_wParameterEs
 	X = zeros<mat>(1,1);
 	G = zeros<mat>(1,1);
 
-	this->jHat = new double*[unitCount];
-	for (int i=0; i < this->unitCount; i++){jHat[i] = new double[unitCount+(parametersPerUnit*unitCount)];}
+	jHat.resize(unitCount, vector<double>(unitCount + parametersPerUnit*unitCount, 0));
+//
+//	this->jHat = new double*[unitCount];
+//	for (int i=0; i < this->unitCount; i++){jHat[i] = new double[unitCount+(parametersPerUnit*unitCount)];}
 //
 //	this->fullTimeseries = new double*[nTimesteps];
 //	int columnCount = unitCount + 1;
@@ -36,6 +38,13 @@ GradientMatchingEngine_wParameterEstimation::GradientMatchingEngine_wParameterEs
 
 
 bool GradientMatchingEngine_wParameterEstimation::runInference(int sampleStepLength){
+
+		cout << interpolatedTimeseries->size() << endl;
+
+		if ((int)interpolatedTimeseries->size()<=unitCount+1){
+			cerr << "cannot run gradient matching. Too few observations -> system is not over-constrained. Please re-do interpolation." << endl;
+			return false;
+		}
 
 		if(!fillJhat(sampleStepLength)){
 			return false;
@@ -91,7 +100,7 @@ bool GradientMatchingEngine_wParameterEstimation::fillJhat(int sampleStepLength)
 				}
 
 				for (int j=0;j<unitCount+(parametersPerUnit);j++){
-					jHat[i][j] = temp(0,j);
+					jHat.at(i).at(j) = temp(0,j);
 				}
 			}
 
@@ -160,7 +169,7 @@ void GradientMatchingEngine_wParameterEstimation::printJhat(){
 	for (int i=0;i<unitCount;i++){
 
 		for (int j=0;j<unitCount;j++){
-			cout << jHat[i][j] << "        ";
+			cout << jHat.at(i).at(j) << "        ";
 		}
 		cout << endl;
 	}
@@ -168,10 +177,37 @@ void GradientMatchingEngine_wParameterEstimation::printJhat(){
 
 	// this should be a separate function:
 	cout << "recontructed parameters = " << endl << endl;
-	for (int i=0; i<unitCount; i++){cout << jHat[i][unitCount] << endl;}
+	for (int i=0; i<unitCount; i++){cout << jHat.at(i).at(unitCount) << endl;}
 
 	cout << "*********************************************************" << endl;
 }
+
+bool GradientMatchingEngine_wParameterEstimation::getEstimatedIM(vector<vector<double> >& estIM){
+
+	if ((int)estIM.size()!=unitCount || (int)estIM.at(0).size()!=unitCount){
+		cerr << "estimated interaction matrix could not be obtained: size mismatch." << endl;
+		return false;
+	}
+
+	for (int i=0; i<unitCount; i++){
+		for (int j=0; j<unitCount; j++){
+			estIM.at(i).at(j) = jHat.at(i).at(j);
+		}
+	}
+
+	return true;
+}
+bool GradientMatchingEngine_wParameterEstimation::getEstimatedParams(vector<double>& estParams){
+
+	if ((int)estParams.size()!=unitCount){
+		cerr << "estimated parameters could not be obtained: size mismatch." << endl;
+		return false;
+	}
+
+	for (int i=0; i<unitCount; i++){estParams.at(i) = jHat.at(i).at(unitCount);}
+	return true;
+}
+
 
 bool GradientMatchingEngine_wParameterEstimation::qualityOfReconstruction(double accuracy, double& quality, vector<double > IMelements){
 	return true;
