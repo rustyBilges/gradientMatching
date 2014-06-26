@@ -39,7 +39,7 @@ GradientMatchingEngine_wParameterEstimation::GradientMatchingEngine_wParameterEs
 
 bool GradientMatchingEngine_wParameterEstimation::runInference(int sampleStepLength){
 
-		cout << interpolatedTimeseries->size() << endl;
+//		cout << interpolatedTimeseries->size() << endl;
 
 		if ((int)interpolatedTimeseries->size()<=unitCount+1){
 			cerr << "cannot run gradient matching. Too few observations -> system is not over-constrained. Please re-do interpolation." << endl;
